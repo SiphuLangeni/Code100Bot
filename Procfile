@@ -1,0 +1,1 @@
+worker: python code100bot.py
