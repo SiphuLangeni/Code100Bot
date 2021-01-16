@@ -38,12 +38,18 @@ class LikesListener(StreamListener):
                         'naturallanguageprocessing', 'computer vision','computervision', \
                         'python', 'tensorflow', 'pytorch', 'bwiai', 'blacktechtwitter']
             
-            if any(keyword in test.casefold() for keyword in test.casefold(): 
-
+            try:
+                tweet_text = tweet.extended_tweet['full_text']
+            
+            except:
+                tweet_text = tweet.text
+            
+            if any(keyword in tweet_text.casefold() for keyword in keywords): 
+                
                 try:
                     tweet.favorite()
                     self.num_likes += 1
-                    if self.num_likes % 10 == 0:
+                    if self.num_likes % 1 == 0:
                         logger.info(f'Liked {self.num_likes} tweets in {diff.seconds / 3600:.2f} hours')
 
                 except Exception as e:
