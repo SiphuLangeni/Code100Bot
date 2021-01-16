@@ -28,28 +28,35 @@ class LikesListener(StreamListener):
             now = dt.utcnow().replace(second=0, microsecond=0)
             diff = now - self.start_time
             
+            keywords = ['data science', 'datascience', 'machine learning', 'machinelearning', \
+                        'deep learning', 'deeplearning', 'nlp', 'natural language processing', \
+                        'naturallanguageprocessing', 'computer vision','computervision', \
+                        'python', 'tensorflow', 'pytorch', 'bwiai', 'blacktechtwitter']
             
-            if diff >= self.delta:
-                self.start_time = now
-                self.num_likes = 0
-                
+            if any(keyword in test.casefold() for keyword in test.casefold()):
             
-            try:
-                tweet.favorite()
-                self.num_likes += 1
-                if self.num_likes % 10 == 0:
-                    logger.info(f'Liked {self.num_likes} tweets in {diff.seconds / 3600:.2f} hours')
+            
+                if diff >= self.delta:
+                    self.start_time = now
+                    self.num_likes = 0
 
-            except Exception as e:
-                logger.error('Unable to like this tweet')
-                
-            
-            if self.num_likes == 900:
-                sleep_time = 86_400 - diff.seconds
-                logger.info(f'900 tweets liked. Sleeping for {sleep_time / 3600:.2f} hours')
-                sleep(sleep_time)
-                self.start_time = now
-                self.num_likes = 0
+
+                try:
+                    tweet.favorite()
+                    self.num_likes += 1
+                    if self.num_likes % 10 == 0:
+                        logger.info(f'Liked {self.num_likes} tweets in {diff.seconds / 3600:.2f} hours')
+
+                except Exception as e:
+                    logger.error('Unable to like this tweet')
+
+
+                if self.num_likes == 900:
+                    sleep_time = 86_400 - diff.seconds
+                    logger.info(f'900 tweets liked. Sleeping for {sleep_time / 3600:.2f} hours')
+                    sleep(sleep_time)
+                    self.start_time = now
+                    self.num_likes = 0
                 
             
     def on_error(self, status_code):
