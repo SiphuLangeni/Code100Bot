@@ -11,12 +11,25 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 
+hashtag_list = ['#100DaysOfCode']
+
+keywords = ['data science', 'datascience', 'machine learning', \
+            'machinelearning', 'deep learning', 'deeplearning', \
+            'nlp', 'natural language processing', \
+            'naturallanguageprocessing', 'computer vision', \
+            'computervision', 'python', 'tensorflow', 'pytorch', \
+            'bwiai', 'blacktechtwitter']
+
+
 class LikesListener(StreamListener):
 
     
-    def __init__(self, api, max_likes=900, delta=1):
+    def __init__(self, api, keywords=keywords, max_likes=900, update_interval=25, delta=1):
+        
         self.api = api
+        self.keywords = keywords
         self.max_likes = max_likes
+        self.update_interval = update_interval
         self.delta = timedelta(days=delta)
         self.me = api.me()
         self.start_time = dt.now().replace(second=0, microsecond=0)
@@ -32,24 +45,20 @@ class LikesListener(StreamListener):
             if diff >= self.delta:
                 self.start_time = now
                 self.num_likes = 0
-            
-            keywords = ['data science', 'datascience', 'machine learning', 'machinelearning', \
-                        'deep learning', 'deeplearning', 'nlp', 'natural language processing', \
-                        'naturallanguageprocessing', 'computer vision','computervision', \
-                        'python', 'tensorflow', 'pytorch', 'bwiai', 'blacktechtwitter']
-            
+
+
             try:
                 tweet_text = tweet.extended_tweet['full_text']
             
             except:
                 tweet_text = tweet.text
             
-            if any(keyword in tweet_text.casefold() for keyword in keywords): 
+            if any(keyword in tweet_text.casefold() for keyword in self.keywords): 
                 
                 try:
                     tweet.favorite()
                     self.num_likes += 1
-                    if self.num_likes % 1 == 0:
+                    if self.num_likes % self.update_interval == 0:
                         logger.info(f'Liked {self.num_likes} tweets in {diff.seconds / 3600:.2f} hours')
 
                 except Exception as e:
@@ -104,17 +113,15 @@ def twitter_auth():
     return api
 
 
-def like_tweets(api, keyword_list):
+def like_tweets(api, hashtag_list):
 
     likes_listener = LikesListener(api)
     stream = Stream(api.auth, likes_listener, tweet_mode='extended')
-    stream.filter(track=keyword_list, languages=['en'])
+    stream.filter(track=hashtag_list, languages=['en'])
 
 
 if __name__ == "__main__":
     
     api = twitter_auth()
-    keyword_list = ['#100DaysOfCode']
-
-    like_tweets(api, keyword_list)
+    like_tweets(api, hashtag_list)
     
