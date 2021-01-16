@@ -1,4 +1,7 @@
 from os import environ
+from datetime import datetime as dt
+from datetime import timedelta
+from time import sleep
 from tweepy import OAuthHandler, Stream, API
 from tweepy.streaming import StreamListener
 import logging
@@ -11,21 +14,43 @@ logger = logging.getLogger()
 class LikesListener(StreamListener):
 
     
-    def __init__(self, api):
+    def __init__(self, api, delta=1):
         self.api = api
+        self.delta = timedelta(days=delta)
         self.me = api.me()
-
+        self.start_time = dt.utcnow().replace(second=0, microsecond=0)
+        self.num_likes = 0
+        
 
     def on_status(self, tweet):
         if 'retweeted_status' not in tweet._json and tweet.in_reply_to_status_id is None:
 
+            now = dt.utcnow().replace(second=0, microsecond=0)
+            diff = now - self.start_time
+            
+            
+            if diff >= self.delta:
+                self.start_time = now
+                self.num_likes = 0
+                
+            
             try:
                 tweet.favorite()
-                logger.info(f'Liked a tweet from user @{tweet.user.screen_name}.')
+                self.num_likes += 1
+                if self.num_likes % 10 == 0:
+                    logger.info(f'Liked {self.num_likes} tweets in {diff.seconds / 3600:.2f} hours')
 
             except Exception as e:
                 logger.error('Unable to like this tweet')
-
+                
+            
+            if self.num_likes == 900:
+                sleep_time = 86_400 - diff.seconds
+                logger.info(f'900 tweets liked. Sleeping for {sleep_time / 3600:.2f} hours')
+                sleep(sleep_time)
+                self.start_time = now
+                self.num_likes = 0
+                
             
     def on_error(self, status_code):
         if status_code == 420:
@@ -69,7 +94,7 @@ def like_tweets(api, keyword_list):
 if __name__ == "__main__":
     
     api = twitter_auth()
-    keyword_list = ['#100DaysOfCode', '#66DaysOfData', '#BWIAI']
+    keyword_list = ['#100DaysOfCode']
 
     like_tweets(api, keyword_list)
     
