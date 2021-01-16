@@ -14,32 +14,31 @@ logger = logging.getLogger()
 class LikesListener(StreamListener):
 
     
-    def __init__(self, api, delta=1):
+    def __init__(self, api, max_likes=900, delta=1):
         self.api = api
+        self.max_likes = max_likes
         self.delta = timedelta(days=delta)
         self.me = api.me()
-        self.start_time = dt.utcnow().replace(second=0, microsecond=0)
+        self.start_time = dt.now().replace(second=0, microsecond=0)
         self.num_likes = 0
         
 
     def on_status(self, tweet):
         if 'retweeted_status' not in tweet._json and tweet.in_reply_to_status_id is None:
 
-            now = dt.utcnow().replace(second=0, microsecond=0)
+            now = dt.now().replace(second=0, microsecond=0)
             diff = now - self.start_time
+            
+            if diff >= self.delta:
+                self.start_time = now
+                self.num_likes = 0
             
             keywords = ['data science', 'datascience', 'machine learning', 'machinelearning', \
                         'deep learning', 'deeplearning', 'nlp', 'natural language processing', \
                         'naturallanguageprocessing', 'computer vision','computervision', \
                         'python', 'tensorflow', 'pytorch', 'bwiai', 'blacktechtwitter']
             
-            if any(keyword in test.casefold() for keyword in test.casefold()):
-            
-            
-                if diff >= self.delta:
-                    self.start_time = now
-                    self.num_likes = 0
-
+            if any(keyword in test.casefold() for keyword in test.casefold(): 
 
                 try:
                     tweet.favorite()
@@ -51,9 +50,17 @@ class LikesListener(StreamListener):
                     logger.error('Unable to like this tweet')
 
 
-                if self.num_likes == 900:
+                if self.num_likes == self.max_likes:
+                    
+                    start_time_str = dt.strftime(self.start_time, '%H:%M')
+                    start_date_str = dt.strftime(self.start_time, '%b:%d')
+                    pause_time_str = dt.strftime(now, '%H:%M')
+                    pause_date_str = dt.strftime(now, '%b:%d')
                     sleep_time = 86_400 - diff.seconds
-                    logger.info(f'900 tweets liked. Sleeping for {sleep_time / 3600:.2f} hours')
+
+                    logger.info(f'Started at {start_time_str} on {start_date_str}')
+                    logger.info(f'Paused at {pause_time_str} on {pause_date_str}')
+                    logger.info(f'Sleeping for {sleep_time / 3600:.2f} hours')
                     sleep(sleep_time)
                     self.start_time = now
                     self.num_likes = 0
