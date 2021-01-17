@@ -24,7 +24,7 @@ keywords = ['data science', 'datascience', 'machine learning', \
 class LikesListener(StreamListener):
 
     
-    def __init__(self, api, keywords=keywords, max_likes=1, update_interval=1, delta=1):
+    def __init__(self, api, keywords=keywords, max_likes=900, update_interval=50, delta=1):
         
         self.api = api
         self.keywords = keywords
@@ -37,8 +37,10 @@ class LikesListener(StreamListener):
         
 
     def on_status(self, tweet):
-        if 'retweeted_status' not in tweet._json and tweet.in_reply_to_status_id is None:
-
+        if 'retweeted_status' not in tweet._json \
+        and tweet.in_reply_to_status_id is None \
+        and tweet.user.id != self.me.id:
+            
             now = dt.now().replace(second=0, microsecond=0)
             diff = now - self.start_time
             
@@ -134,7 +136,7 @@ def twitter_auth():
 def like_tweets(api, hashtag_list):
 
     likes_listener = LikesListener(api)
-    logger.info('\nCode100Bot ready\n')
+    logger.info('\nCode100Bot authentication successful\n')
     stream = Stream(api.auth, likes_listener, tweet_mode='extended')
     logger.info('\nSearching tweets...\n')
     stream.filter(track=hashtag_list, languages=['en'])
