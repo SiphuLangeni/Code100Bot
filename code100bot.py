@@ -2,6 +2,7 @@ from os import environ
 from datetime import datetime as dt
 from datetime import timedelta
 from time import sleep
+import tweepy
 from tweepy import OAuthHandler, Stream, API
 from tweepy.streaming import StreamListener
 import logging
@@ -24,7 +25,7 @@ keywords = ['data science', 'datascience', 'machine learning', \
 class LikesListener(StreamListener):
 
     
-    def __init__(self, api, keywords=keywords, max_likes=900, update_interval=25, delta=1):
+    def __init__(self, api, keywords=keywords, max_likes=2, update_interval=1, delta=1):
         
         self.api = api
         self.keywords = keywords
@@ -59,22 +60,24 @@ class LikesListener(StreamListener):
                     tweet.favorite()
                     self.num_likes += 1
                     if self.num_likes % self.update_interval == 0:
-                        logger.info(f'Liked {self.num_likes} tweets in {diff.seconds / 3600:.2f} hours')
+                        logger.info(f'Liked {self.num_likes} tweets in {diff.seconds / 3600:.2f} \
+                            hours ({dt.strftime(now, "%H:%M")})')
 
                 except Exception as e:
-                    logger.error('Unable to like this tweet')
+                    logger.error(e)
 
 
                 if self.num_likes == self.max_likes:
                     
                     start_time_str = dt.strftime(self.start_time, '%H:%M')
-                    start_date_str = dt.strftime(self.start_time, '%b:%d')
+                    start_date_str = dt.strftime(self.start_time, '%b %d')
                     pause_time_str = dt.strftime(now, '%H:%M')
-                    pause_date_str = dt.strftime(now, '%b:%d')
+                    pause_date_str = dt.strftime(now, '%b %d')
                     sleep_time = 86_400 - diff.seconds
 
                     logger.info(f'Started at {start_time_str} on {start_date_str}')
                     logger.info(f'Paused at {pause_time_str} on {pause_date_str}')
+                    logger.info(f'{self.num_likes} tweets liked')
                     logger.info(f'Sleeping for {sleep_time / 3600:.2f} hours')
                     sleep(sleep_time)
                     self.start_time = now
@@ -102,15 +105,20 @@ def twitter_auth():
         wait_on_rate_limit_notify=True
     )
 
-    try:
-        api.verify_credentials()
-    
-    except Exception as e:
-        logger.error('Unable to authenticate', exc_info=True)
-
-    logger.info('Code100Bot authenticated')
-
+    logger.info('Authenticating Code100Bot')
+    api.verify_credentials()
+        
     return api
+        
+    # except tweepy.error.TweepError:
+    #     print('Unable to connect')
+    #     return False
+
+        
+    #     #  logger.error(e, exc_info=False)
+    #     # print(e.api_code)
+
+    
 
 
 def like_tweets(api, hashtag_list):
@@ -123,5 +131,10 @@ def like_tweets(api, hashtag_list):
 if __name__ == "__main__":
     
     api = twitter_auth()
-    like_tweets(api, hashtag_list)
+    
+    try:
+        like_tweets(api, hashtag_list)
+    except Exception as e:
+        print(e)
+        
     
