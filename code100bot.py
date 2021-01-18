@@ -177,6 +177,12 @@ def twitter_auth():
         
 
 def like_tweets(api, hashtag_list):
+    '''
+    Auto like tweets by hashtag
+
+    :param hashtag_list: Hashtags to filter live stream by
+    :type hashtag_list: list
+    '''
 
     likes_listener = LikesListener(api)
     logger.info('Code100Bot authentication successful\n')
