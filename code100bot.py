@@ -133,6 +133,13 @@ class LikesListener(StreamListener):
 
 
     def on_error(self, status_code):
+        '''
+        Disconnect the stream if connection rate limit has been exceeded
+
+        :param status_code: Status code
+        :type status_code: int
+        '''
+        
         if status_code == 420:
             return False
 
