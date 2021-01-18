@@ -22,10 +22,30 @@ keywords = ['data science', 'datascience', 'machine learning', \
 
 
 class LikesListener(StreamListener):
-
+    ''' 
+    Class that receives messages from a :class:`tweepy.Stream` instance 
     
-    def __init__(self, api, keywords=keywords, max_likes=900, update_interval=50, delta=1):
-        
+    :param api: Wrapper for Twitter API
+    :type api: class:`tweepy.api.API` 
+    
+    :param keywords: Keywords to filter live twitter stream
+    :type keywords: list
+
+    :param max_likes: Maximum number of likes in delta period, defaults to 900
+    :type max_likes: int, optional
+
+    :param log_interval: Number of liked tweets per log message, defaults to 50
+    :type log_interval: int, optional
+
+    :param delta: Fraction of 1 day, defaults to 1.0
+    :type delta: float, optional
+    '''
+
+    def __init__(self, api, keywords=keywords, max_likes=900, log_interval=50, delta=1.0):
+        '''
+        Constructor for :class:`LikesListener` class
+        '''
+
         self.api = api
         self.keywords = keywords
         self.max_likes = max_likes
@@ -60,7 +80,7 @@ class LikesListener(StreamListener):
                 try:
                     tweet.favorite()
                     self.num_likes += 1
-                    if self.num_likes % self.update_interval == 0:
+                    if self.num_likes % self.log_interval == 0:
                         logger.info(
                             f'Liked {self.num_likes} {self.plural(self.num_likes)} '
                             f'at {dt.strftime(now, "%H:%M")}\n'
