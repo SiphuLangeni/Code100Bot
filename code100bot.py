@@ -57,6 +57,13 @@ class LikesListener(StreamListener):
         
 
     def on_status(self, tweet):
+        '''
+        Receives data from statuses from :class:`StreamListener` class
+
+        :param tweet: Tweet data
+        :type tweet: str
+        '''
+        
         if 'retweeted_status' not in tweet._json \
         and tweet.in_reply_to_status_id is None \
         and tweet.user.id != self.me.id:
@@ -139,7 +146,7 @@ class LikesListener(StreamListener):
         :param status_code: Status code
         :type status_code: int
         '''
-        
+
         if status_code == 420:
             return False
 
