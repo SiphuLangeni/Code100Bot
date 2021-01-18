@@ -63,7 +63,7 @@ class LikesListener(StreamListener):
         :param tweet: Tweet data
         :type tweet: str
         '''
-        
+
         if 'retweeted_status' not in tweet._json \
         and tweet.in_reply_to_status_id is None \
         and tweet.user.id != self.me.id:
@@ -153,9 +153,11 @@ class LikesListener(StreamListener):
     
 def twitter_auth():
     '''
-    Authenticate credentials for Twitter API
-    Builds an OAuthHandler from environment variables
-    Returns api
+    Authenticate credentials for Twitter API by building
+    an OAuthHandler from environment variables
+    
+    :returns: Wrapper for Twitter API
+    :rtype: class:`tweepy.api.API`
     '''
 
     auth = OAuthHandler(environ.get('CONSUMER_KEY'), \
