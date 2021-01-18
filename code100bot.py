@@ -7,7 +7,7 @@ from tweepy.streaming import StreamListener
 import logging
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(format='%(message)s', level=logging.INFO)
 logger = logging.getLogger()
 
 
@@ -62,12 +62,12 @@ class LikesListener(StreamListener):
                     self.num_likes += 1
                     if self.num_likes % self.update_interval == 0:
                         logger.info(
-                            f'\nLiked {self.num_likes} {self.plural(self.num_likes)} '
+                            f'Liked {self.num_likes} {self.plural(self.num_likes)} '
                             f'at {dt.strftime(now, "%H:%M")}\n'
                         )
 
                 except Exception as e:
-                    logger.error(f'\n{e}\n')
+                    logger.error(f'{e}\n')
 
 
                 if self.num_likes == self.max_likes:
@@ -84,8 +84,6 @@ class LikesListener(StreamListener):
 
 
                     logger.info(
-                        f'\nStarted at {start_time_str} on {start_date_str}\n'
-                        f'Paused at {pause_time_str} on {pause_date_str}\n'
                         f'Liked {self.num_likes} {self.plural(self.num_likes)}\n'
                         f'Sleeping for {sleep_time / 3600:.2f} hours\n'
                         f'Code100Bot will resume at {resume_time_str} on {resume_date_str}\n'
@@ -114,7 +112,7 @@ def twitter_auth():
     '''
     Authenticate credentials for Twitter API
     Builds an OAuthHandler from environment variables
-    Returns auth
+    Returns api
     '''
 
     auth = OAuthHandler(environ.get('CONSUMER_KEY'), \
@@ -136,9 +134,9 @@ def twitter_auth():
 def like_tweets(api, hashtag_list):
 
     likes_listener = LikesListener(api)
-    logger.info('\nCode100Bot authentication successful\n')
+    logger.info('Code100Bot authentication successful\n')
     stream = Stream(api.auth, likes_listener, tweet_mode='extended')
-    logger.info('\nSearching tweets...\n')
+    logger.info('Searching tweets...\n')
     stream.filter(track=hashtag_list, languages=['en'])
 
 
@@ -150,6 +148,5 @@ if __name__ == "__main__":
         like_tweets(api, hashtag_list)
     
     except Exception as e:
-        logger.error(f'\n{e}\n')
+        logger.error(f'{e}\n')
         
-    
