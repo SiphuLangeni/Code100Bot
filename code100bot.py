@@ -114,6 +114,15 @@ class LikesListener(StreamListener):
                 
 
     def plural(self, num_tweets):
+        '''
+        Applies proper pluralization to the string 'tweet'
+
+        :param num_tweets: Number of tweets that have been liked
+        :type num_tweets: int
+
+        :returns: Correct plural form of tweet
+        :rtype: str
+        '''
         
         if self.num_likes == 1:
             plural = 'tweet'
