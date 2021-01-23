@@ -41,7 +41,7 @@ class LikesListener(StreamListener):
     :type delta: float, optional
     '''
 
-    def __init__(self, api, keywords=keywords, max_likes=900, log_interval=50, delta=1.0):
+    def __init__(self, api, keywords=keywords, max_likes=950, log_interval=25, delta=1.0):
         '''
         Constructor for :class:`LikesListener` class
         '''
@@ -49,7 +49,7 @@ class LikesListener(StreamListener):
         self.api = api
         self.keywords = keywords
         self.max_likes = max_likes
-        self.update_interval = update_interval
+        self.log_interval = log_interval
         self.delta = timedelta(days=delta)
         self.me = api.me()
         self.start_time = dt.now().replace(second=0, microsecond=0)
