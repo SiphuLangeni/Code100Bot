@@ -148,6 +148,11 @@ class LikesListener(StreamListener):
         '''
 
         if status_code == 420:
+            logger.error('420 - Too many requests')
+            return False
+
+        if status_code == 429:
+            logger.error('429 - Too many requests')
             return False
 
     
