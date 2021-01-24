@@ -90,11 +90,11 @@ class LikesListener(StreamListener):
                     if self.num_likes % self.log_interval == 0:
                         logger.info(
                             f'Liked {self.num_likes} {self.plural(self.num_likes)} '
-                            f'at {dt.strftime(now, "%H:%M")}\n'
+                            f'at {dt.strftime(now, "%H:%M")}'
                         )
 
                 except Exception as e:
-                    logger.error(f'{e}\n')
+                    logger.error(f'{e}')
 
 
                 if self.num_likes == self.max_likes:
@@ -113,7 +113,7 @@ class LikesListener(StreamListener):
                     logger.info(
                         f'Liked {self.num_likes} {self.plural(self.num_likes)}\n'
                         f'Sleeping for {sleep_time / 3600:.2f} hours\n'
-                        f'Code100Bot will resume at {resume_time_str} on {resume_date_str}\n'
+                        f'Code100Bot will resume at {resume_time_str} on {resume_date_str}'
                     )
                     sleep(sleep_time)
                     self.start_time = now
@@ -185,9 +185,9 @@ def like_tweets(api, hashtag_list):
     '''
 
     likes_listener = LikesListener(api)
-    logger.info('Code100Bot authentication successful\n')
+    logger.info('Code100Bot authentication successful')
     stream = Stream(api.auth, likes_listener, tweet_mode='extended')
-    logger.info('Searching tweets...\n')
+    logger.info('Searching tweets...')
     stream.filter(track=hashtag_list, languages=['en'])
 
 
@@ -199,5 +199,5 @@ if __name__ == "__main__":
         like_tweets(api, hashtag_list)
     
     except Exception as e:
-        logger.error(f'{e}\n')
+        logger.error(f'{e}')
         
