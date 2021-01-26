@@ -18,7 +18,7 @@ keywords = ['data science', 'datascience', 'machine learning', \
             'nlp', 'natural language processing', \
             'naturallanguageprocessing', 'computer vision', \
             'computervision', 'python', 'tensorflow', 'pytorch', \
-            'bwiai', 'blacktechtwitter']
+            'womenintech', 'womenwhocode', 'bwiai', 'blacktechtwitter']
 
 
 class LikesListener(StreamListener):
@@ -41,7 +41,7 @@ class LikesListener(StreamListener):
     :type delta: float, optional
     '''
 
-    def __init__(self, api, keywords=keywords, max_likes=950, log_interval=25, delta=1.0):
+    def __init__(self, api, keywords=keywords, max_likes=900, log_interval=25, delta=1.0):
         '''
         Constructor for :class:`LikesListener` class
         '''
@@ -63,61 +63,65 @@ class LikesListener(StreamListener):
         :param tweet: Tweet data
         :type tweet: str
         '''
+        if 'bot' not in tweet.user.screen_name.casefold():
 
-        if 'retweeted_status' not in tweet._json \
-        and tweet.in_reply_to_status_id is None \
-        and tweet.user.id != self.me.id:
-            
-            now = dt.now().replace(second=0, microsecond=0)
-            diff = now - self.start_time
-            
-            if diff >= self.delta:
-                self.start_time = now
-                self.num_likes = 0
-
-
-            try:
-                tweet_text = tweet.extended_tweet['full_text']
-            
-            except:
-                tweet_text = tweet.text
-            
-            if any(keyword in tweet_text.casefold() for keyword in self.keywords): 
+            if 'retweeted_status' not in tweet._json \
+            and tweet.in_reply_to_status_id is None \
+            and tweet.user.id != self.me.id:
                 
-                try:
-                    tweet.favorite()
-                    self.num_likes += 1
-                    if self.num_likes % self.log_interval == 0:
-                        logger.info(
-                            f'Liked {self.num_likes} {self.plural(self.num_likes)} '
-                            f'at {dt.strftime(now, "%H:%M")}'
-                        )
-
-                except Exception as e:
-                    logger.error(f'{e}')
-
-
-                if self.num_likes == self.max_likes:
-                    
-                    start_time_str = dt.strftime(self.start_time, '%H:%M')
-                    start_date_str = dt.strftime(self.start_time, '%b %d')
-                    pause_time_str = dt.strftime(now, '%H:%M')
-                    pause_date_str = dt.strftime(now, '%b %d')
-                    sleep_time = 86_400 - diff.seconds
-                    
-                    resume_at = now + timedelta(seconds=sleep_time)
-                    resume_time_str = dt.strftime(resume_at, '%H:%M')
-                    resume_date_str = dt.strftime(resume_at, '%b %d')
-
-
-                    logger.info(
-                        f'Liked {self.num_likes} {self.plural(self.num_likes)}\n'
-                        f'Sleeping for {sleep_time / 3600:.2f} hours\n'
-                        f'Code100Bot will resume at {resume_time_str} on {resume_date_str}'
-                    )
-                    sleep(sleep_time)
+                now = dt.now().replace(second=0, microsecond=0)
+                diff = now - self.start_time
+                
+                if diff >= self.delta:
                     self.start_time = now
                     self.num_likes = 0
+
+
+                try:
+                    tweet_text = tweet.extended_tweet['full_text']
+                
+                except:
+                    tweet_text = tweet.text
+                
+                if any(keyword in tweet_text.casefold() for keyword in self.keywords): 
+                    
+                    try:
+                        tweet.favorite()
+                        self.num_likes += 1
+                        if self.num_likes % self.log_interval == 0:
+                            logger.info(
+                                f'Liked {self.num_likes} {self.plural(self.num_likes)} '
+                                f'at {dt.strftime(now, "%H:%M")}'
+                            )
+
+                    except Exception as e:
+                        logger.error(
+                            f'{e}\n'
+                            f'Screen Name: {tweet.user.screen_name}\n'
+                            f'Tweet ID: {tweet.id}'
+                        )
+                        
+                    if self.num_likes == self.max_likes:
+                        
+                        start_time_str = dt.strftime(self.start_time, '%H:%M')
+                        start_date_str = dt.strftime(self.start_time, '%b %d')
+                        pause_time_str = dt.strftime(now, '%H:%M')
+                        pause_date_str = dt.strftime(now, '%b %d')
+                        sleep_time = 86_400 - diff.seconds
+                        
+                        resume_at = now + timedelta(seconds=sleep_time)
+                        resume_time_str = dt.strftime(resume_at, '%H:%M')
+                        resume_date_str = dt.strftime(resume_at, '%b %d')
+
+
+                        logger.info(
+                            f'Liked {self.num_likes} {self.plural(self.num_likes)}\n'
+                            f'Sleeping for {sleep_time / 3600:.2f} hours\n'
+                            f'Code100Bot will resume at {resume_time_str} on {resume_date_str}'
+                        )
+                        sleep(sleep_time)
+                        self.start_time = now
+                        self.num_likes = 0
                 
 
     def plural(self, num_tweets):
